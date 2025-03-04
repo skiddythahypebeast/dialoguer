@@ -1,4 +1,4 @@
-use std::future::Future;
+use std::{future::Future, sync::Arc};
 
 use console::{style, Key, Term};
 use spinoff::{spinners, Spinner};
@@ -19,18 +19,24 @@ impl Loader {
 
         self
     }
-    pub async fn interact_with_cancel<T>(&self, fut: impl Future<Output = T>) -> Option<T> {
-        let term = Term::stderr();
+    pub async fn interact_with_cancel<R>(&self, fut: impl Future<Output = R>) -> Option<R> {
+        let term = Arc::new(Term::stderr());
+        let (request_sender, request_receiver) = oneshot::channel::<()>();
+
         let mut spinner = Spinner::new(
             spinners::Moon, 
             format!("{} {}", self.prompt, style("| hit enter to cancel").dim()), 
             None
         );
 
+        let exit_term = Arc::clone(&term);
         let exit_handle = tokio::spawn(async move {
             loop {
-                match term.read_key() {
-                    Ok(Key::Enter) => break,
+                if request_receiver.try_recv().is_ok() {
+                    return;
+                }
+                match exit_term.read_key() {
+                    Ok(Key::Enter) => return,
                     _ => (),
                 }
             };
@@ -39,17 +45,21 @@ impl Loader {
         select! {
             _ = exit_handle => {
                 spinner.clear();
+                term.flush().unwrap();
 
                 return None;
             },
             fut = fut => {
                 spinner.clear();
+                
+                request_sender.send(()).unwrap();
+                term.flush().unwrap();
 
                 return Some(fut)
             }
         };
     }
-    pub async fn interact<T>(&self, fut: impl Future<Output = T>) -> T {
+    pub async fn interact<R>(&self, fut: impl Future<Output = R>) -> R {
         let mut spinner = Spinner::new(
             spinners::Moon, 
             format!("{}", self.prompt), 
