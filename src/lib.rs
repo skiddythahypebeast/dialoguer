@@ -44,7 +44,6 @@ pub use history::{BasicHistory, History};
 use paging::Paging;
 pub use validate::{InputValidator, PasswordValidator};
 
-pub use prompts::loader::Loader;
 #[cfg(feature = "fuzzy-select")]
 pub use prompts::fuzzy_select::FuzzySelect;
 #[cfg(feature = "password")]

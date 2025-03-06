@@ -3,7 +3,7 @@ name = "dialoguer"
 description = "A command line prompting library."
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.63.0"
+rust-version = "1.77.0"
 authors = [
 	"Armin Ronacher <armin.ronacher@active-4.com>",
 	"Pavan Kumar Sunkara <pavan.sss1991@gmail.com>"
@@ -31,7 +31,7 @@ zeroize = { version = "1.1.1", optional = true }
 fuzzy-matcher = { version = "0.3.7", optional = true }
 shell-words = "1.1.0"
 thiserror = "2.0.11"
-tokio = "1.43.0"
+tokio = { version = "1", features = ["full"] }
 spinoff = "0.8.0"
 oneshot = "0.1.11"
 

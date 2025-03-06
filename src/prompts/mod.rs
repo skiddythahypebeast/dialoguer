@@ -5,7 +5,6 @@ pub mod input;
 pub mod multi_select;
 pub mod select;
 pub mod sort;
-pub mod loader;
 
 #[cfg(feature = "fuzzy-select")]
 pub mod fuzzy_select;
